@@ -26,6 +26,7 @@ async fn main() -> Result<(), Error> {
     Ok(())
 }
 
+// This is the Lambda function
 async fn func(event: LambdaEvent<lambda_handler::LambdaProxyEvent>) -> Result<Value, Error> {
     let (event, _context) = event.into_parts();
     info!("Received event: {:?}", event);
@@ -33,11 +34,8 @@ async fn func(event: LambdaEvent<lambda_handler::LambdaProxyEvent>) -> Result<Va
     info!("Received body: {:?}", body);
     let payload: MyPayload = serde_json::from_str(&body).unwrap_or_default();
     info!("Received payload: {:?}", payload);
-
+    // Return the Ok response with the payload
     Ok(json!(payload))
-    // let first_name = event["first_name"].as_str().unwrap_or("world");
-
-    // Ok(json!({ "message": format!("Hello, {}!", first_name) }))
 }
 
 fn init_lambda_tracing() {
