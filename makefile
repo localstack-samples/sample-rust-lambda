@@ -9,8 +9,7 @@ ZIP_FILE = lambda.zip
 ARG_TARGET = aarch64-unknown-linux-gnu
 BIN_NAME = lambda
 # replace with your AWS account number
-#AWS_ACCT=000000000000
-AWS_ACCT=764727150240
+AWS_ACCT=000000000000
 LAMBDA_ROLE_NAME = $(LAMBDA_NAME)-role
 
 export ARCHITECTURE=$(shell uname -m | sed 's/amd64/x86_64/')
