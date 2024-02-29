@@ -1,12 +1,16 @@
 .PHONY: all test clean build package delete-lambda create-lambda update-lambda get-lambda-url it-again
 
+-include .env-gdc
+-include .env-gdc-local
+
 LAMBDA_URL = $(shell aws lambda get-function-url-config --function-name grpc-rust-test | jq -rc '.FunctionUrl')
 LAMBDA_NAME = grpc-rust-test
 ZIP_FILE = lambda.zip
 ARG_TARGET = aarch64-unknown-linux-gnu
 BIN_NAME = lambda
 # replace with your AWS account number
-AWS_ACCT=000000000000
+#AWS_ACCT=000000000000
+AWS_ACCT=764727150240
 LAMBDA_ROLE_NAME = $(LAMBDA_NAME)-role
 
 export ARCHITECTURE=$(shell uname -m | sed 's/amd64/x86_64/')
@@ -64,7 +68,7 @@ create-lambda-function: package
 	  --handler doesnt.matter \
 	  --zip-file fileb://./$(ZIP_FILE) \
 	  --runtime provided.al2023 \
-	  --role arn:aws:iam::$(AWS_ACCT):role/service-role/$(LAMBDA_ROLE_NAME) \
+	  --role arn:aws:iam::$(AWS_ACCT):role/$(LAMBDA_ROLE_NAME) \
 	  --environment "Variables={RUST_BACKTRACE=1, RUST_LOG=INFO}"
 	sleep 5
 	aws lambda create-function-url-config --function-name $(LAMBDA_NAME) \
@@ -88,3 +92,11 @@ it-again: all update-lambda get-lambda-url
 
 test:
 	LAMBDA_INVOKE_URL=$(LAMBDA_URL) cargo test
+
+start-localstack:
+	@ARCHITECTURE=$(ARCHITECTURE); \
+    if [ "$$ARCHITECTURE" = "x86_64" ]; then \
+        cd devops-tooling && docker compose -f docker-compose.localstack.yml -f docker-compose.amd64_localstack.yml -p $(APP_NAME) up $(DOCKER_COMPOSE_FLAGS); \
+    else \
+        cd devops-tooling && docker compose -f docker-compose.localstack.yml -p $(APP_NAME) up $(DOCKER_COMPOSE_FLAGS); \
+    fi
